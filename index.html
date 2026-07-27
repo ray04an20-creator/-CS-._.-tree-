@@ -155,8 +155,8 @@
         <h2>شجرة قسم علوم الحاسوب 🎓</h2>
         <p>جامعة الرفاق - حدد نظامك الدراسي للبدء:</p>
         <div class="modal-buttons">
-            <button class="modal-btn" onclick="selectInitialType('regular')">📘 طالب منتظم (التزام بالشجرة)</button>
-            <button class="modal-btn" onclick="selectInitialType('transfer')">🔄 طالب معادلة (تنزيل حر)</button>
+            <button class="modal-btn" onclick="selectInitialType('regular')">📘 طالب منتظم (التزام بالقيود)</button>
+            <button class="modal-btn" onclick="selectInitialType('transfer')">🔄 طالب معادلة (اختيار حر بدون إغلاق)</button>
         </div>
     </div>
 </div>
@@ -198,7 +198,7 @@
             <h3 style="color:var(--primary); font-size:1.05rem; margin-bottom:8px;">🎯 المواد المتاحة حالياً (حسب الأولوية)</h3>
             
             <div class="alert-box">
-                ⚠️ تظهر هنا المواد التي استوفيت متطلبها السابق فقط. الحد الأقصى لتسجيل الفصل هو **21 وحدة**.
+                ⚠️ تُعرض المواد بناءً على استيفاء المتطلب السابق فقط. الحد الأقصى للتسجيل هو **21 وحدة**.
             </div>
 
             <div id="all-available-list"></div>
@@ -208,7 +208,7 @@
                     <span>💡 الجدول المقترح للتسجيل (أقصاه 21)</span>
                     <span id="schedule-units-count" style="font-size:0.8rem; color:var(--primary);">0 وحدة</span>
                 </h4>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">أفضل مواد للتسجيل في الفصل القادم بدون تعارض في المتطلبات:</p>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">أفضل مواد للتسجيل في الفصل القادم بحسب شجرة الأولوية:</p>
                 <div id="suggested-schedule-list"></div>
             </div>
         </div>
@@ -322,17 +322,18 @@
         return count;
     }
 
-    // فحص صارم: هل المادة متاحة للتصفية حالياً بناءً على تصفية كل متطلب سابق؟
+    // فحص صلاحية المادة للاقتراح والجدول
     function isCourseEligible(c, currentUnits) {
         if (passed.has(c.id)) return false;
         
-        // فحص شرط عدد الوحدات (مواد التخرج)
+        // فحص شرط عدد الوحدات لمواد التخرج
         if (c.reqUnits && currentUnits < c.reqUnits) return false;
 
         // فحص المواد الاختيارية
         if (c.isOptional && getPassedOptionalCount() >= 2) return false;
 
-        // شرط صارم: يجب أن تكون جميع المتطلبات السابقة منجزة (موجودة في passed)
+        // شرط شجرة المتطلبات الصارم لجميع الطلاب (منتظم ومعادلة):
+        // المادة لا ترشح إلا إذا كانت جميع متطلبها السابق مصفاة بالفعل
         if (c.prereqs && c.prereqs.length > 0) {
             const allPrereqsPassed = c.prereqs.every(p => passed.has(p));
             if (!allPrereqsPassed) return false;
@@ -360,9 +361,11 @@
             courses.filter(c => c.cat === cat).forEach(c => {
                 const isPassed = passed.has(c.id);
                 
-                // المادة تكون مقفولة لو لم تستوفِ متطلبها السابق في كل الأحوال
+                // تحديد القفل البصري:
+                // الطالب المنتظم: يقفل عليه الكرت لو متطلبه مش مصفى
+                // طالب المعادلة: لا يقفل أي كرت لتسهيل تصفية مواده المعادلة بحرية
                 let isLocked = false;
-                if (!isPassed) {
+                if (studentType === 'regular' && !isPassed) {
                     if (c.prereqs && c.prereqs.some(p => !passed.has(p))) isLocked = true;
                     if (c.reqUnits && currentUnits < c.reqUnits) isLocked = true;
                     if (c.isOptional && optionalPassedCount >= 2) isLocked = true;
@@ -395,8 +398,7 @@
                     ${prereqName ? `<div class="prereq">${prereqName}</div>` : ''}
                 `;
 
-                // في الطالب المنتظم لا يمكن الضغط على المادة المقفولة، أما طالب المعادلة فيمكنه الضغط حرارياً للتصفية السريعة
-                if (studentType === 'transfer' || !isLocked) {
+                if (!isLocked) {
                     card.onclick = () => toggle(c.id);
                 }
                 grid.appendChild(card);
@@ -441,10 +443,10 @@
         availableContainer.innerHTML = '';
         scheduleContainer.innerHTML = '';
 
-        // 1. تصفية المواد: فقط المواد التي تم إنجاز متطلبها السابق بنجاح
+        // تصفية المواد القابلة للتنزيل فوراً وفقاً لشجرة المتطلبات
         let avail = courses.filter(c => isCourseEligible(c, u));
 
-        // 2. ترتيب الأولوية الذكي (المواد التي تفتح فروع أكثر لها أولوية أعلى)
+        // ترتيب المواد بناءً على الأكثر أهمية في الشجرة (التي تفتح مواد متسلسلة أكثر)
         avail.sort((a, b) => {
             if (a.reqUnits && !b.reqUnits) return -1;
             if (!a.reqUnits && b.reqUnits) return 1;
@@ -466,7 +468,7 @@
             return;
         }
 
-        // 3. عرض قائمة المواد المتاحة بالأولوية الصارمة
+        // عرض قائمة المواد المتاحة قانونياً
         avail.forEach((c, idx) => {
             const item = document.createElement('div');
             item.className = 'next-item';
@@ -485,7 +487,7 @@
             availableContainer.appendChild(item);
         });
 
-        // 4. بناء الجدول المقترح من الأعلى أولوية بشرط عدم تجاوز 21 وحدة
+        // تشكيل الجدول المقترح بحد أقصى 21 وحدة
         let totalUnits = 0;
         let selectedCourses = [];
 
