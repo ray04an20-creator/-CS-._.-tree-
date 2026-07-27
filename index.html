@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> شجرة قسم علوم الحاسوب - جامعة الرفاق </title>
+    <title>شجرة قسم علوم الحاسوب - جامعة الرفاق الأهلية</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -128,7 +128,7 @@
 <div class="welcome-overlay" id="welcome-modal">
     <div class="welcome-modal">
         <h2>شجرة قسم علوم الحاسوب 🎓</h2>
-        <p>جامعة الرفاق - حدد نظامك الدراسي للبدء:</p>
+        <p>جامعة الرفاق الأهلية - حددي نظامك الدراسي للبدء:</p>
         <div class="modal-buttons">
             <button class="modal-btn" onclick="selectInitialType('regular')">📘 طالب منتظم (متطلبات شجرية)</button>
             <button class="modal-btn" onclick="selectInitialType('transfer')">🔄 طالب معادلة (تنزيل حر)</button>
@@ -238,9 +238,15 @@
         { id: 'sec', title: 'أمن المعلومات والبيانات', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['net'] },
         { id: 'net_design', title: 'إعداد وتصميم وحماية الشبكات', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['net'] },
 
-        // 3. مرحلة التخرج
+        // 3. مرحلة التخرج والمواد الاختيارية
         { id: 'train', title: 'مناهج البحث والتدريب الميداني', units: 2, cat: '3. مرحلة التخرج', reqUnits: 115 },
         { id: 'proj', title: 'مشروع التخرج', units: 4, cat: '3. مرحلة التخرج', reqUnits: 115 },
+
+        // المواد الاختيارية (يختار الطالب 2 فقط من أصل 4)
+        { id: 'opt1', title: 'مقرر اختياري 1', units: 4, cat: '4. المواد الاختيارية (اختر 2 فقط)', isOptional: true, prereqs: [] },
+        { id: 'opt2', title: 'مقرر اختياري 2', units: 4, cat: '4. المواد الاختيارية (اختر 2 فقط)', isOptional: true, prereqs: [] },
+        { id: 'opt3', title: 'مقرر اختياري 3', units: 4, cat: '4. المواد الاختيارية (اختر 2 فقط)', isOptional: true, prereqs: [] },
+        { id: 'opt4', title: 'مقرر اختياري 4', units: 4, cat: '4. المواد الاختيارية (اختر 2 فقط)', isOptional: true, prereqs: [] }
     ];
 
     let passed = new Set();
@@ -264,10 +270,19 @@
         return sum;
     }
 
+    function getPassedOptionalCount() {
+        let count = 0;
+        courses.filter(c => c.isOptional).forEach(c => {
+            if (passed.has(c.id)) count++;
+        });
+        return count;
+    }
+
     function render() {
         const container = document.getElementById('categories-container');
         container.innerHTML = '';
         const currentUnits = getPassedUnits();
+        const optionalPassedCount = getPassedOptionalCount();
         const cats = [...new Set(courses.map(c => c.cat))];
 
         cats.forEach(cat => {
@@ -288,6 +303,11 @@
                     if (c.reqUnits && currentUnits < c.reqUnits) isLocked = true;
                 }
 
+                // شرط المواد الاختيارية: إذا تم اختيار مادتين اختياريين، تُغلق باقي المواد الاختيارية غير المختارة
+                if (c.isOptional && !isPassed && optionalPassedCount >= 2) {
+                    isLocked = true;
+                }
+
                 const card = document.createElement('div');
                 card.className = `course-card ${isPassed ? 'passed' : ''} ${isLocked ? 'locked' : ''}`;
 
@@ -297,7 +317,9 @@
 
                 let prereqName = '';
                 if (c.reqUnits) prereqName = `تتطلب ${c.reqUnits} وحدة`;
-                else if (c.prereqs && c.prereqs.length > 0) {
+                else if (c.isOptional && optionalPassedCount >= 2 && !isPassed) {
+                    prereqName = 'تم إكمال الـ 8 وحدات الاختيارية';
+                } else if (c.prereqs && c.prereqs.length > 0) {
                     const titles = c.prereqs.map(pid => {
                         const p = courses.find(x => x.id === pid);
                         return p ? p.title : '';
@@ -323,7 +345,7 @@
         document.getElementById('grad-condition').innerText = `${currentUnits} / ${GRAD_REQ_UNITS}`;
         document.getElementById('progress-percent').innerText = `${Math.round((currentUnits/TOTAL_UNITS)*100)}%`;
 
-        updateNext(currentUnits);
+        updateNext(currentUnits, optionalPassedCount);
     }
 
     function toggle(id) {
@@ -348,11 +370,12 @@
         render();
     }
 
-    function updateNext(u) {
+    function updateNext(u, optionalCount) {
         const list = document.getElementById('next-courses-list');
         list.innerHTML = '';
         const avail = courses.filter(c => {
             if (passed.has(c.id)) return false;
+            if (c.isOptional && optionalCount >= 2) return false; // عدم اقتراح اختياري ثالث
             if (studentType === 'transfer') return true;
             if (c.reqUnits && u < c.reqUnits) return false;
             return !c.prereqs || c.prereqs.every(p => passed.has(p));
