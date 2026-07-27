@@ -206,7 +206,9 @@
         { id: 'ds1', title: 'تراكيب بيانات 1', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['c_lang'] },
         { id: 'ds2', title: 'تراكيب بيانات 2', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['ds1'] },
         { id: 'ai', title: 'الذكاء الاصطناعي', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['ds2'] },
-        { id: 'img', title: 'معالجة الصور', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['ai'] },
+        
+        // مادة اختيارية (1 من 4)
+        { id: 'img', title: 'معالجة الصور (اختياري)', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['ai'], isOptional: true },
 
         { id: 'v1', title: 'البرمجة المرئية 1', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['c_lang'] },
         { id: 'v2', title: 'البرمجة المرئية 2', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['v1'] },
@@ -217,7 +219,8 @@
         { id: 'web', title: 'تصميم مواقع الإنترنت', units: 3, cat: '2.أ المسار البرمجي', prereqs: ['num'] },
         { id: 'discrete', title: 'تراكيب منفصلة', units: 3, cat: '2.أ المسار البرمجي', prereqs: ['c_lang'] },
 
-        { id: 'mobile', title: 'تطبيقات موبايل', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['web', 'java'] },
+        // مادة اختيارية (2 من 4)
+        { id: 'mobile', title: 'تطبيقات موبايل (اختياري)', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['web', 'java'], isOptional: true },
 
         // 2.ب مسار تحليل النظم والبرمجيات
         { id: 'cs_intro', title: 'مقدمة في علم الحاسوب', units: 3, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: [] },
@@ -235,18 +238,15 @@
         { id: 'org', title: 'تنظيم حاسبات', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['digital'] },
         { id: 'asm', title: 'لغة التجميع', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['org'] },
         { id: 'net', title: 'شبكات الحاسوب', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['asm'] },
-        { id: 'sec', title: 'أمن المعلومات والبيانات', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['net'] },
-        { id: 'net_design', title: 'إعداد وتصميم وحماية الشبكات', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['net'] },
+        
+        // مادة اختيارية (3 من 4)
+        { id: 'sec', title: 'أمن المعلومات والبيانات (اختياري)', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['net'], isOptional: true },
+        // مادة اختيارية (4 من 4)
+        { id: 'net_design', title: 'إعداد وتصميم وحماية الشبكات (اختياري)', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['net'], isOptional: true },
 
-        // 3. مرحلة التخرج والمواد الاختيارية
+        // 3. مرحلة التخرج
         { id: 'train', title: 'مناهج البحث والتدريب الميداني', units: 2, cat: '3. مرحلة التخرج', reqUnits: 115 },
-        { id: 'proj', title: 'مشروع التخرج', units: 4, cat: '3. مرحلة التخرج', reqUnits: 115 },
-
-        // المواد الاختيارية (يختار الطالب 2 فقط من أصل 4)
-        { id: 'opt1', title: 'مقرر اختياري 1', units: 4, cat: '4. المواد الاختيارية (اختر 2 فقط)', isOptional: true, prereqs: [] },
-        { id: 'opt2', title: 'مقرر اختياري 2', units: 4, cat: '4. المواد الاختيارية (اختر 2 فقط)', isOptional: true, prereqs: [] },
-        { id: 'opt3', title: 'مقرر اختياري 3', units: 4, cat: '4. المواد الاختيارية (اختر 2 فقط)', isOptional: true, prereqs: [] },
-        { id: 'opt4', title: 'مقرر اختياري 4', units: 4, cat: '4. المواد الاختيارية (اختر 2 فقط)', isOptional: true, prereqs: [] }
+        { id: 'proj', title: 'مشروع التخرج', units: 4, cat: '3. مرحلة التخرج', reqUnits: 115 }
     ];
 
     let passed = new Set();
@@ -303,7 +303,7 @@
                     if (c.reqUnits && currentUnits < c.reqUnits) isLocked = true;
                 }
 
-                // شرط المواد الاختيارية: إذا تم اختيار مادتين اختياريين، تُغلق باقي المواد الاختيارية غير المختارة
+                // قفل باقي المواد الاختيارية إذا تم اختيار 2 مادتين
                 if (c.isOptional && !isPassed && optionalPassedCount >= 2) {
                     isLocked = true;
                 }
@@ -316,13 +316,14 @@
                 dots += '</div>';
 
                 let prereqName = '';
-                if (c.reqUnits) prereqName = `تتطلب ${c.reqUnits} وحدة`;
-                else if (c.isOptional && optionalPassedCount >= 2 && !isPassed) {
-                    prereqName = 'تم إكمال الـ 8 وحدات الاختيارية';
+                if (c.reqUnits) {
+                    prereqName = `تتطلب ${c.reqUnits} وحدة`;
+                } else if (c.isOptional && optionalPassedCount >= 2 && !isPassed) {
+                    prereqName = 'تم إكمال المادتين الاختياريتين';
                 } else if (c.prereqs && c.prereqs.length > 0) {
                     const titles = c.prereqs.map(pid => {
                         const p = courses.find(x => x.id === pid);
-                        return p ? p.title : '';
+                        return p ? p.title.replace(' (اختياري)', '') : '';
                     }).join(' + ');
                     prereqName = `تفتح بعد: ${titles}`;
                 }
@@ -375,7 +376,7 @@
         list.innerHTML = '';
         const avail = courses.filter(c => {
             if (passed.has(c.id)) return false;
-            if (c.isOptional && optionalCount >= 2) return false; // عدم اقتراح اختياري ثالث
+            if (c.isOptional && optionalCount >= 2) return false;
             if (studentType === 'transfer') return true;
             if (c.reqUnits && u < c.reqUnits) return false;
             return !c.prereqs || c.prereqs.every(p => passed.has(p));
