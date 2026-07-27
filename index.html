@@ -22,7 +22,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background-color: var(--bg-light); color: var(--text-dark); padding: 20px; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* الشاشة الأولية (Overlay & Modal) */
         .welcome-overlay {
             position: fixed;
             top: 0;
@@ -299,14 +298,14 @@
 </head>
 <body>
 
-<!-- الشاشة الأولية لاختيار نظام الطالب -->
+<!-- النافذة الترحيبية لتحديد نظام الدراسة -->
 <div class="welcome-overlay" id="welcome-modal">
     <div class="welcome-modal">
         <h2>مرحباً بك في شجرة المواد 🎓</h2>
-        <p>يرجى تحديد نظامك الدراسي للبدء في عرض واستخدام شجرة المواد الخاصة بك:</p>
+        <p>يرجى تحديد نظامك الدراسي لعرض شجرة المواد الخاصة بك بتسلسلها الدقيق:</p>
         <div class="modal-buttons">
             <button class="modal-btn" onclick="selectInitialType('regular')">
-                <span>📘 طالب منتظم (من البداية / التزام بالمتطلبات)</span>
+                <span>📘 طالب منتظم (الالتزام بالمتطلبات السابقة)</span>
             </button>
             <button class="modal-btn" onclick="selectInitialType('transfer')">
                 <span>🔄 طالب معادلة (تنزيل حر / بدون قيود شجرية)</span>
@@ -318,7 +317,7 @@
 <div class="container">
     <header>
         <h1>🎓 شجرة مواد علوم الحاسوب - جامعة الرفاق</h1>
-        <p>يمكنك تغيير نظامك الدراسي في أي وقت من خلال الخيارات أدناه</p>
+        <p>يمكنك التبديل بين نظام الطالب المنتظم وطالب المعادلة في أي وقت</p>
         
         <div class="student-type-selector">
             <button id="btn-regular" class="type-btn active" onclick="setStudentType('regular')">
@@ -337,7 +336,7 @@
         </div>
         <div class="stat-card success">
             <h3>الوحدات المنجزة</h3>
-            <div class="value" id="passed-units">0 / 138</div>
+            <div class="value" id="passed-units">0 / 142</div>
         </div>
         <div class="stat-card warning">
             <h3>شرط مشروع التخرج</h3>
@@ -371,61 +370,62 @@
 </footer>
 
 <script>
-    const TOTAL_GRAD_UNITS = 138; // تم تعديل إجمالي الوحدات بعد إلغاء المادتين الاختياريتين
+    const TOTAL_GRAD_UNITS = 142;
     const PREREQ_UNITS_REQUIRED = 115;
 
     const courses = [
-        // المواد العامة (23 وحدة)
-        { code: 'GHS143', title: 'اللغة الانجليزية 1', units: 2, category: 'المواد العامة (23 وحدة)', prereq: null },
-        { code: 'GS101', title: 'رياضة 1', units: 3, category: 'المواد العامة (23 وحدة)', prereq: null },
-        { code: 'GHS141', title: 'اللغة العربية 1', units: 2, category: 'المواد العامة (23 وحدة)', prereq: null },
-        { code: 'GHS130', title: 'ثقافة اسلامية', units: 2, category: 'المواد العامة (23 وحدة)', prereq: null },
-        { code: 'GHS131', title: 'مبادئ العلوم السياسية', units: 2, category: 'المواد العامة (23 وحدة)', prereq: null },
-        { code: 'GHS144', title: 'اللغة الانجليزية 2', units: 2, category: 'المواد العامة (23 وحدة)', prereq: 'GHS143' },
-        { code: 'GS102', title: 'رياضة 2', units: 3, category: 'المواد العامة (23 وحدة)', prereq: 'GS101' },
-        { code: 'GS105', title: 'احصاء واحتمالات', units: 4, category: 'المواد العامة (23 وحدة)', prereq: 'GS101' },
-        { code: 'GS203', title: 'جبرخطي والمنطق', units: 3, category: 'المواد العامة (23 وحدة)', prereq: 'GS102' },
+        // أ. مسار المواد العامة (23 وحدة)
+        { code: 'GHS141', title: 'اللغة العربية 1', units: 2, category: 'أ. المواد العامة (23 وحدة)', prereq: null },
+        { code: 'GHS143', title: 'اللغة الانجليزية 1', units: 2, category: 'أ. المواد العامة (23 وحدة)', prereq: null },
+        { code: 'GHS144', title: 'اللغة الانجليزية 2', units: 2, category: 'أ. المواد العامة (23 وحدة)', prereq: 'GHS143' },
+        { code: 'GS101', title: 'رياضة 1', units: 3, category: 'أ. المواد العامة (23 وحدة)', prereq: null },
+        { code: 'GS102', title: 'رياضة 2', units: 3, category: 'أ. المواد العامة (23 وحدة)', prereq: 'GS101' },
+        { code: 'GS105', title: 'احصاء واحتمالات', units: 4, category: 'أ. المواد العامة (23 وحدة)', prereq: 'GS102' },
+        { code: 'GS203', title: 'جبر خطي ومنطق', units: 3, category: 'أ. المواد العامة (23 وحدة)', prereq: 'GS102' },
+        { code: 'GHS130', title: 'ثقافة اسلامية', units: 2, category: 'أ. المواد العامة (23 وحدة)', prereq: null },
+        { code: 'GHS131', title: 'مبادئ علوم سياسية', units: 2, category: 'أ. المواد العامة (23 وحدة)', prereq: null },
 
-        // المواد التخصصية (111 وحدة)
-        { code: 'CS110', title: 'مبادئ هندسة كهربائية', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: null },
-        { code: 'CS112', title: 'مقدمة في علم الحاسوب', units: 3, category: 'المواد التخصصية (111 وحدة)', prereq: null },
-        { code: 'CS111', title: 'اساسيات برمجة', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: null },
+        // ب. مسار البرمجة وتطوير الأنظمة
+        { code: 'CS111', title: 'أساسيات برمجة', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: null },
+        { code: 'CS222', title: 'لغة C', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'GHS141' },
+        { code: 'CS221', title: 'البرمجة الشيئية (OOP)', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS111' },
+        { code: 'CS223', title: 'البرمجة المرئية 1', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS221' },
+        { code: 'CS326', title: 'البرمجة المرئية 2', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS223' },
+        { code: 'CS353', title: 'النمذجة والمحاكاة', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS326' },
 
-        { code: 'CS113', title: 'مقدمة انظمة رقمية', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS110' },
-        { code: 'CS131', title: 'تحليل نظم', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS112' },
-        { code: 'CS222', title: 'لغة C', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS111' },
-        { code: 'CS251', title: 'تراكيب بيانات 1', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS111' },
-        { code: 'CS223', title: 'برمجة مرئية 1 (بيسك)', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS111' },
+        { code: 'CS251', title: 'تراكيب بيانات 1', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: null },
+        { code: 'CS352', title: 'تراكيب بيانات 2', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS251' },
+        { code: 'CS455', title: 'الذكاء الاصطناعي', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS352' },
+        { code: 'CS393', title: 'معالجة الصور', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS455' },
+        { code: 'CS456', title: 'الرسم بالحاسوب', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS393' },
 
-        { code: 'CS214', title: 'تنظيم حاسبات', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS113' },
-        { code: 'CS232', title: 'هندسة برمجيات', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS131' },
-        { code: 'CS242', title: 'طرق عددية وبرمجة', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS222' },
-        { code: 'CS352', title: 'تراكيب بيانات 2', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS251' },
-        { code: 'CS326', title: 'برمجة مرئية 2 (V.B2)', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS223' },
+        { code: 'CS242', title: 'طرق عددية وبرمجية', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: null },
+        { code: 'CS461', title: 'تصميم مواقع الإنترنت', units: 3, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS242' },
+        { code: 'CS392', title: 'تطبيقات موبايل', units: 4, category: 'ب. البرمجة وتطوير الأنظمة', prereq: 'CS461' },
 
-        { code: 'CS215', title: 'ASSEMBLY لغة التجميع', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS214' },
-        { code: 'CS271', title: 'ادارة قواعد بيانات', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS232' },
-        { code: 'CS141', title: 'تراكيب منفصلة', units: 3, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS352' },
-        { code: 'CS455', title: 'ذكاء الاصطناعي', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS352' },
-        { code: 'CS324', title: 'لغة دلفي', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS326' },
-        { code: 'CS327', title: 'لغة جافا', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS326' },
+        // ج. مسار هندسة البرمجيات وتحليل الأنظمة
+        { code: 'CS112', title: 'مقدمة في علم الحاسوب', units: 3, category: 'ج. هندسة البرمجيات وتحليل الأنظمة', prereq: null },
+        { code: 'CS131', title: 'تحليل نظم', units: 4, category: 'ج. هندسة البرمجيات وتحليل الأنظمة', prereq: 'CS112' },
+        { code: 'CS232', title: 'هندسة البرمجيات', units: 4, category: 'ج. هندسة البرمجيات وتحليل الأنظمة', prereq: 'CS131' },
+        { code: 'CS271', title: 'إدارة قواعد البيانات', units: 4, category: 'ج. هندسة البرمجيات وتحليل الأنظمة', prereq: 'CS232' },
+        { code: 'CS216', title: 'نظم تشغيل', units: 4, category: 'ج. هندسة البرمجيات وتحليل الأنظمة', prereq: 'CS271' },
 
-        { code: 'CS381', title: 'شبكات حاسوب', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS215' },
-        { code: 'CS216', title: 'نظم تشغيل', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS215' },
-        { code: 'CS354', title: 'برمجة نظم', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS216' },
-        { code: 'CS461', title: 'تصميم مواقع الانترنت', units: 3, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS327' },
-        { code: 'CS392', title: 'تطبيقات موبايل', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS327' },
-        { code: 'CS353', title: 'النمذجة والمحاكاة', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS455' },
-        { code: 'CS393', title: 'معالجة الصور', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS455' },
+        // د. مسار العتاد والشبكات
+        { code: 'CS110', title: 'مبادئ هندسة كهربائية', units: 4, category: 'د. العتاد والشبكات', prereq: null },
+        { code: 'CS113', title: 'مقدمة أنظمة رقمية', units: 4, category: 'د. العتاد والشبكات', prereq: 'CS110' },
+        { code: 'CS214', title: 'تنظيم حاسبات', units: 4, category: 'د. العتاد والشبكات', prereq: 'CS113' },
+        { code: 'CS215', title: 'لغة التجميع (Assembly)', units: 4, category: 'د. العتاد والشبكات', prereq: 'CS214' },
+        { code: 'CS381', title: 'شبكات الحاسوب', units: 4, category: 'د. العتاد والشبكات', prereq: 'CS215' },
+        { code: 'CS394', title: 'أمن المعلومات والبيانات', units: 4, category: 'د. العتاد والشبكات', prereq: 'CS381' },
+        { code: 'CS391', title: 'بناء وحماية الشبكات', units: 4, category: 'د. العتاد والشبكات', prereq: 'CS394' },
 
-        { code: 'CS317', title: 'معمارية الحاسوب', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS381' },
-        { code: 'CS391', title: 'بناء وحماية الشبكات', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS381' },
-        { code: 'CS394', title: 'امن المعلومات والبيانات', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS381' },
-        { code: 'CS456', title: 'الرسم بالحاسوب', units: 4, category: 'المواد التخصصية (111 وحدة)', prereq: 'CS393' },
+        // هـ. مرحلة التخرج (شرط 115 وحدة)
+        { code: 'CS498', title: 'مناهج البحث والتدريب الميداني', units: 2, category: 'هـ. مرحلة التخرج (شرط 115 وحدة)', reqUnits: 115 },
+        { code: 'CS499', title: 'مشروع التخرج', units: 4, category: 'هـ. مرحلة التخرج (شرط 115 وحدة)', reqUnits: 115 },
 
-        // مرحلة التخرج
-        { code: 'CS498', title: 'مناهج البحث والتدريب الميداني', units: 2, category: 'مرحلة التخرج (شرط 115 وحدة)', reqUnits: 115 },
-        { code: 'CS499', title: 'مشروع التخرج', units: 4, category: 'مرحلة التخرج (شرط 115 وحدة)', reqUnits: 115 }
+        // و. المواد الاختيارية (8 وحدات)
+        { code: 'ELE01', title: 'مادة اختيارية 1', units: 4, category: 'و. المواد الاختيارية (8 وحدات)', prereq: null },
+        { code: 'ELE02', title: 'مادة اختيارية 2', units: 4, category: 'و. المواد الاختيارية (8 وحدات)', prereq: null }
     ];
 
     let passedCourses = new Set();
