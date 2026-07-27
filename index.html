@@ -71,7 +71,7 @@
         .stat-card h3 { font-size: 0.8rem; color: var(--text-muted); }
         .stat-card .value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
 
-        .main-layout { display: grid; grid-template-columns: 2.3fr 1fr; gap: 20px; }
+        .main-layout { display: grid; grid-template-columns: 2.1fr 1.2fr; gap: 20px; }
         @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
 
         .category-title {
@@ -105,15 +105,41 @@
         }
         .course-card.passed .status-badge { background: var(--success); color: white; }
 
+        /* اللوحة الجانبية لمقترحات الفصل */
         .next-panel {
             background: var(--card-bg); padding: 18px; border-radius: 16px;
             border: 1px solid var(--border); height: fit-content; position: sticky; top: 20px;
         }
 
+        .alert-box {
+            background: #fef3c7; border-right: 4px solid var(--warning);
+            padding: 10px; border-radius: 8px; font-size: 0.82rem; color: #78350f;
+            margin-bottom: 12px; font-weight: 600; line-height: 1.4;
+        }
+
         .next-item {
-            padding: 8px; background: #f8fafc; border-right: 3px solid var(--primary-light);
-            margin-bottom: 6px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;
-            display: flex; justify-content: space-between;
+            padding: 8px 10px; background: #f8fafc; border-right: 3px solid var(--primary-light);
+            margin-bottom: 6px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .next-item .priority-tag {
+            font-size: 0.7rem; background: #e0e7ff; color: var(--primary);
+            padding: 2px 6px; border-radius: 4px; font-weight: 700;
+        }
+
+        .suggested-schedule-box {
+            margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--border);
+        }
+
+        .suggested-schedule-box h4 {
+            color: var(--success); font-size: 0.95rem; margin-bottom: 8px; font-weight: 800;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .schedule-item {
+            padding: 8px; background: #ecfdf5; border-right: 3px solid var(--success);
+            margin-bottom: 6px; border-radius: 6px; font-size: 0.82rem; font-weight: 700;
+            display: flex; justify-content: space-between; color: #065f46;
         }
 
         footer {
@@ -170,8 +196,22 @@
         </div>
 
         <div class="next-panel">
-            <h3 style="color:var(--primary); font-size:1rem; margin-bottom:10px;">🚀 الاقتراح الأكاديمي المقترَح (حتى 21 وحدة)</h3>
-            <div id="next-courses-list"></div>
+            <h3 style="color:var(--primary); font-size:1.05rem; margin-bottom:8px;">📚 المواد المتاحة للفصل القادم</h3>
+            
+            <div class="alert-box">
+                ⚠️ <strong>ملاحظة مهمة:</strong> القائمة أدناه تعرض <strong>جميع المواد</strong> التي يمكنك تنزيلها مرتبة بالأولوية الشجرية. علماً بأن الحد الأقصى المسموح بتسجيله هو <strong>21 وحدة فقط</strong>.
+            </div>
+
+            <div id="all-available-list"></div>
+
+            <div class="suggested-schedule-box">
+                <h4>
+                    <span>💡 جدول مقترح (21 وحدة أقصى)</span>
+                    <span id="schedule-units-count" style="font-size:0.8rem; color:var(--primary);">0 وحدة</span>
+                </h4>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">هذا الجدول يساعدك واختير بعناية بناءً على أهم المواد وأكثرها تأثيراً على خطتك:</p>
+                <div id="suggested-schedule-list"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -247,7 +287,6 @@
     let passed = new Set();
     let studentType = 'regular';
 
-    // ** دالة حساب ثقل/عمق المادة في الشجرة **
     function calculateDependents(courseId) {
         let count = 0;
         courses.forEach(c => {
@@ -377,53 +416,87 @@
     }
 
     function updateNext(u, optionalCount) {
-        const list = document.getElementById('next-courses-list');
-        list.innerHTML = '';
+        const availableContainer = document.getElementById('all-available-list');
+        const scheduleContainer = document.getElementById('suggested-schedule-list');
+        
+        availableContainer.innerHTML = '';
+        scheduleContainer.innerHTML = '';
 
-        // 1. تصفية المواد المتاحة قانونياً للتسجيل
+        // 1. استخراج المواد المتاحة قانونياً
         let avail = courses.filter(c => {
             if (passed.has(c.id)) return false;
             if (c.isOptional && optionalCount >= 2) return false;
-            if (c.reqUnits && u < c.reqUnits) return false; // شرط مشروع التخرج والتدريب (115 وحدة)
+            if (c.reqUnits && u < c.reqUnits) return false;
             
             if (studentType === 'regular') {
                 return !c.prereqs || c.prereqs.every(p => passed.has(p));
             }
-            return true; // طالب المعادلة له مرونة أكبر
+            return true;
         });
 
-        // 2. خوارزمية الترتيب بالأولوية الذكية حسب عمق الشجرة
+        // 2. ترتيب حسب الأولوية الشجرية (Tree Weight)
         avail.sort((a, b) => {
-            // أ) مشروع التخرج والتدريب تأخذ أولوية فورية عند استيفاء شرط الـ 115 وحدة
             if (a.reqUnits && !b.reqUnits) return -1;
             if (!a.reqUnits && b.reqUnits) return 1;
 
-            // ب) الأولوية للمادة التي تفتح سلسلة أطول من المواد المستقلة (Tree Weight)
             let weightA = calculateDependents(a.id);
             let weightB = calculateDependents(b.id);
             if (weightA !== weightB) return weightB - weightA;
 
-            // ج) تقديم المواد الإجبارية على الاختيارية
             if (!a.isOptional && b.isOptional) return -1;
             if (a.isOptional && !b.isOptional) return 1;
 
             return 0;
         });
 
-        // 3. بناء القائمة مع مراعاة حد الـ 21 وحدة وعدم تكرار السلسلة بنفس الفصل
-        let total = 0;
-        avail.forEach(c => {
-            if (total + c.units <= 21) {
-                total += c.units;
-                
-                const item = document.createElement('div');
-                item.className = 'next-item';
-                item.innerHTML = `<span>${c.title}</span><span>${c.units} وحدات</span>`;
-                list.appendChild(item);
-            }
+        if (avail.length === 0) {
+            availableContainer.innerHTML = '<div style="color:var(--text-muted); text-align:center; font-size:0.85rem;">لا توجد مواد متاحة حالياً.</div>';
+            scheduleContainer.innerHTML = '<div style="color:var(--text-muted); text-align:center; font-size:0.85rem;">لا يوجد مواد لتشكيل جدول.</div>';
+            document.getElementById('schedule-units-count').innerText = '0 وحدة';
+            return;
+        }
+
+        // 3. عرض **جميع** المواد المتاحة بالأولوية بدون حد الـ 21
+        avail.forEach((c, idx) => {
+            const item = document.createElement('div');
+            item.className = 'next-item';
+            
+            let depCount = calculateDependents(c.id);
+            let priorityText = depCount > 0 ? `تفتح ${depCount} مواد` : 'مادة مسار/عامة';
+            if(c.reqUnits) priorityText = 'متطلب تخرج';
+
+            item.innerHTML = `
+                <div>
+                    <div>${idx + 1}. ${c.title}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">${c.units} وحدات</div>
+                </div>
+                <span class="priority-tag">${priorityText}</span>
+            `;
+            availableContainer.appendChild(item);
         });
 
-        if (total === 0) list.innerHTML = '<div style="color:var(--text-muted); text-align:center;">لا يوجد مواد متاحة حالياً.</div>';
+        // 4. تشكيل **جدول الـ 21 وحدة المقترح** بناءً على أول أولوية
+        let totalUnits = 0;
+        let selectedCourses = [];
+
+        for (let c of avail) {
+            if (totalUnits + c.units <= 21) {
+                totalUnits += c.units;
+                selectedCourses.push(c);
+            }
+        }
+
+        document.getElementById('schedule-units-count').innerText = `${totalUnits} / 21 وحدة`;
+
+        selectedCourses.forEach((c, i) => {
+            const sItem = document.createElement('div');
+            sItem.className = 'schedule-item';
+            sItem.innerHTML = `
+                <span>✓ ${c.title}</span>
+                <span>${c.units} وحدات</span>
+            `;
+            scheduleContainer.appendChild(sItem);
+        });
     }
 
     render();
