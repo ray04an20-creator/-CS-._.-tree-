@@ -263,7 +263,7 @@
 
         // 2.ب مسار تحليل النظم والبرمجيات
         { id: 'cs_intro', title: 'مقدمة في علم الحاسوب', units: 3, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: [] },
-        { id: 'sa', title: 'تحليل نظم', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['cs_intro'] },
+        { id: 'sa', title: 'تحليل نظم', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['prog_base'] },
         { id: 'se', title: 'هندسة البرمجيات', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['sa'] },
         { id: 'db', title: 'إدارة قواعد البيانات', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['sa'] },
         { id: 'os', title: 'نظم تشغيل', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['se'] },
@@ -273,7 +273,7 @@
 
         // 2.ج مسار العتاد والشبكات
         { id: 'ee', title: 'مبادئ هندسة كهربائية', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: [] },
-        { id: 'digital', title: 'مقدمة لأنظمة رقمية', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['ee'] },
+        { id: 'digital', title: 'مقدمة لأنظمة رقمية', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['ee', 'cs_intro'] }, // تعديل: تطلب هندسة كهربائية + مقدمة حاسوب
         { id: 'org', title: 'تنظيم حاسبات', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['digital'] },
         { id: 'asm', title: 'لغة التجميع', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['org'] },
         { id: 'net', title: 'شبكات الحاسوب', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['asm'] },
@@ -325,17 +325,12 @@
         return count;
     }
 
-    // فحص صلاحية المادة للاقتراح والجدول
     function isCourseEligible(c, currentUnits) {
         if (passed.has(c.id)) return false;
         
-        // فحص شرط عدد الوحدات لمواد التخرج
         if (c.reqUnits && currentUnits < c.reqUnits) return false;
-
-        // فحص عدد المواد الاختيارية المنجزة (الحد الأقصى 2)
         if (c.isOptional && getPassedOptionalCount() >= 2) return false;
 
-        // شرط شجرة المتطلبات الصارم: المادة لا تظهر إلا إذا استُوفيت كل متطلباتها السابقة
         if (c.prereqs && c.prereqs.length > 0) {
             const allPrereqsPassed = c.prereqs.every(p => passed.has(p));
             if (!allPrereqsPassed) return false;
@@ -363,7 +358,6 @@
             courses.filter(c => c.cat === cat).forEach(c => {
                 const isPassed = passed.has(c.id);
                 
-                // التثبيت البصري: الطالب المنتظم يُقفل عليه الكرت، طالب المعادلة مسموح يحدد أي مادة حرّة
                 let isLocked = false;
                 if (studentType === 'regular' && !isPassed) {
                     if (c.prereqs && c.prereqs.some(p => !passed.has(p))) isLocked = true;
@@ -443,22 +437,15 @@
         availableContainer.innerHTML = '';
         scheduleContainer.innerHTML = '';
 
-        // 1. تصفية المواد المتاحة قانونياً حسب الشجرة
         let avail = courses.filter(c => isCourseEligible(c, u));
 
-        // 2. ترتيب الأولوية الصارم:
-        // - المواد الأساسية أولاً دائماً.
-        // - المواد الاختيارية أخيرة دائماً (توضع في القاع).
         avail.sort((a, b) => {
-            // المواد الإجبارية تسبق المواد الاختيارية دائماً
             if (!a.isOptional && b.isOptional) return -1;
             if (a.isOptional && !b.isOptional) return 1;
 
-            // مواد التخرج لها أولوية لو تحققت
             if (a.reqUnits && !b.reqUnits) return -1;
             if (!a.reqUnits && b.reqUnits) return 1;
 
-            // المواد التي تفتح فروع أعمق لها أولوية أعلى
             let weightA = calculateDependents(a.id);
             let weightB = calculateDependents(b.id);
             if (weightA !== weightB) return weightB - weightA;
@@ -473,7 +460,6 @@
             return;
         }
 
-        // 3. عرض القائمة بالأولوية
         avail.forEach((c, idx) => {
             const item = document.createElement('div');
             item.className = 'next-item';
@@ -498,7 +484,6 @@
             availableContainer.appendChild(item);
         });
 
-        // 4. بناء الجدول المقترح من الأعلى أولوية بشرط عدم تجاوز 21 وحدة
         let totalUnits = 0;
         let selectedCourses = [];
 
