@@ -125,6 +125,9 @@
             font-size: 0.7rem; background: #e0e7ff; color: var(--primary);
             padding: 2px 6px; border-radius: 4px; font-weight: 700;
         }
+        .next-item .priority-tag.optional-tag {
+            background: #fef3c7; color: #b45309;
+        }
 
         .suggested-schedule-box {
             margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--border);
@@ -198,7 +201,7 @@
             <h3 style="color:var(--primary); font-size:1.05rem; margin-bottom:8px;">🎯 المواد المتاحة حالياً (حسب الأولوية)</h3>
             
             <div class="alert-box">
-                ⚠️ تُعرض المواد بناءً على استيفاء المتطلب السابق فقط. الحد الأقصى للتسجيل هو **21 وحدة**.
+                ⚠️ تُعرض المواد الأساسية أولاً، والمواد الاختيارية تأتي في النهاية. الحد الأقصى للتسجيل هو **21 وحدة**.
             </div>
 
             <div id="all-available-list"></div>
@@ -208,7 +211,7 @@
                     <span>💡 الجدول المقترح للتسجيل (أقصاه 21)</span>
                     <span id="schedule-units-count" style="font-size:0.8rem; color:var(--primary);">0 وحدة</span>
                 </h4>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">أفضل مواد للتسجيل في الفصل القادم بحسب شجرة الأولوية:</p>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">أفضل مواد أساسية للتسجيل في الفصل القادم:</p>
                 <div id="suggested-schedule-list"></div>
             </div>
         </div>
@@ -329,11 +332,10 @@
         // فحص شرط عدد الوحدات لمواد التخرج
         if (c.reqUnits && currentUnits < c.reqUnits) return false;
 
-        // فحص المواد الاختيارية
+        // فحص عدد المواد الاختيارية المنجزة (الحد الأقصى 2)
         if (c.isOptional && getPassedOptionalCount() >= 2) return false;
 
-        // شرط شجرة المتطلبات الصارم لجميع الطلاب (منتظم ومعادلة):
-        // المادة لا ترشح إلا إذا كانت جميع متطلبها السابق مصفاة بالفعل
+        // شرط شجرة المتطلبات الصارم: المادة لا تظهر إلا إذا استُوفيت كل متطلباتها السابقة
         if (c.prereqs && c.prereqs.length > 0) {
             const allPrereqsPassed = c.prereqs.every(p => passed.has(p));
             if (!allPrereqsPassed) return false;
@@ -361,9 +363,7 @@
             courses.filter(c => c.cat === cat).forEach(c => {
                 const isPassed = passed.has(c.id);
                 
-                // تحديد القفل البصري:
-                // الطالب المنتظم: يقفل عليه الكرت لو متطلبه مش مصفى
-                // طالب المعادلة: لا يقفل أي كرت لتسهيل تصفية مواده المعادلة بحرية
+                // التثبيت البصري: الطالب المنتظم يُقفل عليه الكرت، طالب المعادلة مسموح يحدد أي مادة حرّة
                 let isLocked = false;
                 if (studentType === 'regular' && !isPassed) {
                     if (c.prereqs && c.prereqs.some(p => !passed.has(p))) isLocked = true;
@@ -443,20 +443,25 @@
         availableContainer.innerHTML = '';
         scheduleContainer.innerHTML = '';
 
-        // تصفية المواد القابلة للتنزيل فوراً وفقاً لشجرة المتطلبات
+        // 1. تصفية المواد المتاحة قانونياً حسب الشجرة
         let avail = courses.filter(c => isCourseEligible(c, u));
 
-        // ترتيب المواد بناءً على الأكثر أهمية في الشجرة (التي تفتح مواد متسلسلة أكثر)
+        // 2. ترتيب الأولوية الصارم:
+        // - المواد الأساسية أولاً دائماً.
+        // - المواد الاختيارية أخيرة دائماً (توضع في القاع).
         avail.sort((a, b) => {
+            // المواد الإجبارية تسبق المواد الاختيارية دائماً
+            if (!a.isOptional && b.isOptional) return -1;
+            if (a.isOptional && !b.isOptional) return 1;
+
+            // مواد التخرج لها أولوية لو تحققت
             if (a.reqUnits && !b.reqUnits) return -1;
             if (!a.reqUnits && b.reqUnits) return 1;
 
+            // المواد التي تفتح فروع أعمق لها أولوية أعلى
             let weightA = calculateDependents(a.id);
             let weightB = calculateDependents(b.id);
             if (weightA !== weightB) return weightB - weightA;
-
-            if (!a.isOptional && b.isOptional) return -1;
-            if (a.isOptional && !b.isOptional) return 1;
 
             return 0;
         });
@@ -468,26 +473,32 @@
             return;
         }
 
-        // عرض قائمة المواد المتاحة قانونياً
+        // 3. عرض القائمة بالأولوية
         avail.forEach((c, idx) => {
             const item = document.createElement('div');
             item.className = 'next-item';
             
             let depCount = calculateDependents(c.id);
-            let priorityText = depCount > 0 ? `تفتح ${depCount} مواد` : 'مادة مسار/عامة';
-            if(c.reqUnits) priorityText = 'متطلب تخرج';
+            let priorityText = depCount > 0 ? `تفتح ${depCount} مواد` : 'مادة أساسية';
+            let isOptTag = false;
+
+            if (c.reqUnits) priorityText = 'متطلب تخرج';
+            if (c.isOptional) {
+                priorityText = 'مادة اختيارية';
+                isOptTag = true;
+            }
 
             item.innerHTML = `
                 <div>
                     <div>${idx + 1}. ${c.title}</div>
                     <div style="font-size:0.7rem; color:var(--text-muted);">${c.units} وحدات</div>
                 </div>
-                <span class="priority-tag">${priorityText}</span>
+                <span class="priority-tag ${isOptTag ? 'optional-tag' : ''}">${priorityText}</span>
             `;
             availableContainer.appendChild(item);
         });
 
-        // تشكيل الجدول المقترح بحد أقصى 21 وحدة
+        // 4. بناء الجدول المقترح من الأعلى أولوية بشرط عدم تجاوز 21 وحدة
         let totalUnits = 0;
         let selectedCourses = [];
 
@@ -504,7 +515,7 @@
             const sItem = document.createElement('div');
             sItem.className = 'schedule-item';
             sItem.innerHTML = `
-                <span>✓ ${c.title}</span>
+                <span>✓ ${c.title} ${c.isOptional ? '(اختياري)' : ''}</span>
                 <span>${c.units} وحدات</span>
             `;
             scheduleContainer.appendChild(sItem);
