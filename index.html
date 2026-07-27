@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> شجرة قسم علوم الحاسوب - جامعة الرفاق </title>
+    <title>شجرة قسم علوم الحاسوب - جامعة الرفاق </title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -130,7 +130,7 @@
         <h2>شجرة قسم علوم الحاسوب 🎓</h2>
         <p>جامعة الرفاق - حدد نظامك الدراسي للبدء:</p>
         <div class="modal-buttons">
-            <button class="modal-btn" onclick="selectInitialType('regular')">📘 طالب منتظم (متطلبات شجرية)</button>
+            <button class="modal-btn" onclick="selectInitialType('regular')">📘 طالب منتظم (التزام بالشجرة)</button>
             <button class="modal-btn" onclick="selectInitialType('transfer')">🔄 طالب معادلة (تنزيل حر)</button>
         </div>
     </div>
@@ -170,7 +170,7 @@
         </div>
 
         <div class="next-panel">
-            <h3 style="color:var(--primary); font-size:1rem; margin-bottom:10px;">🚀 اقتراح الفصل القادم (حتى 21 وحدة)</h3>
+            <h3 style="color:var(--primary); font-size:1rem; margin-bottom:10px;">🚀 الاقتراح الأكاديمي المقترَح (حتى 21 وحدة)</h3>
             <div id="next-courses-list"></div>
         </div>
     </div>
@@ -186,66 +186,77 @@
 
     const courses = [
         // 1. قسم المواد العامة
-        { id: 'ar1', title: 'اللغة العربية', units: 2, cat: '1. المواد العامة', priority: 1, prereqs: [] },
-        { id: 'islamic', title: 'ثقافة إسلامية', units: 2, cat: '1. المواد العامة', priority: 1, prereqs: [] },
-        { id: 'politics', title: 'مبادئ علوم سياسية', units: 2, cat: '1. المواد العامة', priority: 1, prereqs: [] },
-        { id: 'en1', title: 'اللغة الإنجليزية 1', units: 2, cat: '1. المواد العامة', priority: 2, prereqs: [] },
-        { id: 'en2', title: 'اللغة الإنجليزية 2', units: 2, cat: '1. المواد العامة', priority: 3, prereqs: ['en1'] },
-        { id: 'm1', title: 'رياضة 1', units: 3, cat: '1. المواد العامة', priority: 5, prereqs: [] },
-        { id: 'm2', title: 'رياضة 2', units: 3, cat: '1. المواد العامة', priority: 5, prereqs: ['m1'] },
-        { id: 'stat', title: 'إحصاء واحتمالات', units: 4, cat: '1. المواد العامة', priority: 3, prereqs: ['m2'] },
-        { id: 'logic', title: 'جبر خطي ومنطق', units: 3, cat: '1. المواد العامة', priority: 3, prereqs: ['m2'] },
+        { id: 'ar1', title: 'اللغة العربية', units: 2, cat: '1. المواد العامة', prereqs: [] },
+        { id: 'islamic', title: 'ثقافة إسلامية', units: 2, cat: '1. المواد العامة', prereqs: [] },
+        { id: 'politics', title: 'مبادئ علوم سياسية', units: 2, cat: '1. المواد العامة', prereqs: [] },
+        { id: 'en1', title: 'اللغة الإنجليزية 1', units: 2, cat: '1. المواد العامة', prereqs: [] },
+        { id: 'en2', title: 'اللغة الإنجليزية 2', units: 2, cat: '1. المواد العامة', prereqs: ['en1'] },
+        { id: 'm1', title: 'رياضة 1', units: 3, cat: '1. المواد العامة', prereqs: [] },
+        { id: 'm2', title: 'رياضة 2', units: 3, cat: '1. المواد العامة', prereqs: ['m1'] },
+        { id: 'stat', title: 'إحصاء واحتمالات', units: 4, cat: '1. المواد العامة', prereqs: ['m2'] },
+        { id: 'logic', title: 'جبر خطي ومنطق', units: 3, cat: '1. المواد العامة', prereqs: ['m2'] },
 
         // 2.أ المسار البرمجي
-        { id: 'prog_base', title: 'أساسيات برمجية', units: 4, cat: '2.أ المسار البرمجي', priority: 10, prereqs: [] },
-        { id: 'c_lang', title: 'لغة السي', units: 4, cat: '2.أ المسار البرمجي', priority: 10, prereqs: ['prog_base'] },
+        { id: 'prog_base', title: 'أساسيات برمجية', units: 4, cat: '2.أ المسار البرمجي', prereqs: [] },
+        { id: 'c_lang', title: 'لغة السي', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['prog_base'] },
         
-        { id: 'oop', title: 'البرمجة الشيئية', units: 4, cat: '2.أ المسار البرمجي', priority: 8, prereqs: ['c_lang'] },
-        { id: 'java', title: 'لغة الجافا', units: 4, cat: '2.أ المسار البرمجي', priority: 8, prereqs: ['oop'] },
+        { id: 'oop', title: 'البرمجة الشيئية', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['c_lang'] },
+        { id: 'java', title: 'لغة الجافا', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['oop'] },
 
-        { id: 'ds1', title: 'تراكيب بيانات 1', units: 4, cat: '2.أ المسار البرمجي', priority: 9, prereqs: ['c_lang'] },
-        { id: 'ds2', title: 'تراكيب بيانات 2', units: 4, cat: '2.أ المسار البرمجي', priority: 8, prereqs: ['ds1'] },
-        { id: 'ai', title: 'الذكاء الاصطناعي', units: 4, cat: '2.أ المسار البرمجي', priority: 7, prereqs: ['ds2'] },
-        { id: 'img', title: 'معالجة الصور (اختياري)', units: 4, cat: '2.أ المسار البرمجي', priority: 4, prereqs: ['ai'], isOptional: true },
+        { id: 'ds1', title: 'تراكيب بيانات 1', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['c_lang'] },
+        { id: 'ds2', title: 'تراكيب بيانات 2', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['ds1'] },
+        { id: 'ai', title: 'الذكاء الاصطناعي', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['ds2'] },
+        { id: 'img', title: 'معالجة الصور (اختياري)', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['ai'], isOptional: true },
 
-        { id: 'v1', title: 'البرمجة المرئية 1', units: 4, cat: '2.أ المسار البرمجي', priority: 7, prereqs: ['c_lang'] },
-        { id: 'v2', title: 'البرمجة المرئية 2', units: 4, cat: '2.أ المسار البرمجي', priority: 6, prereqs: ['v1'] },
-        { id: 'sim', title: 'النمذجة والمحاكاة', units: 4, cat: '2.أ المسار البرمجي', priority: 5, prereqs: ['v2'] },
-        { id: 'gfx', title: 'الرسم بالحاسوب', units: 4, cat: '2.أ المسار البرمجي', priority: 4, prereqs: ['sim'] },
+        { id: 'v1', title: 'البرمجة المرئية 1', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['c_lang'] },
+        { id: 'v2', title: 'البرمجة المرئية 2', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['v1'] },
+        { id: 'sim', title: 'النمذجة والمحاكاة', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['v2'] },
+        { id: 'gfx', title: 'الرسم بالحاسوب', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['sim'] },
 
-        { id: 'num', title: 'طرق عددية وبرمجية', units: 4, cat: '2.أ المسار البرمجي', priority: 6, prereqs: ['c_lang'] },
-        { id: 'web', title: 'تصميم مواقع الإنترنت', units: 3, cat: '2.أ المسار البرمجي', priority: 6, prereqs: ['num'] },
-        { id: 'discrete', title: 'تراكيب منفصلة', units: 3, cat: '2.أ المسار البرمجي', priority: 5, prereqs: ['c_lang'] },
+        { id: 'num', title: 'طرق عددية وبرمجية', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['c_lang'] },
+        { id: 'web', title: 'تصميم مواقع الإنترنت', units: 3, cat: '2.أ المسار البرمجي', prereqs: ['num'] },
+        { id: 'discrete', title: 'تراكيب منفصلة', units: 3, cat: '2.أ المسار البرمجي', prereqs: ['c_lang'] },
 
-        { id: 'mobile', title: 'تطبيقات موبايل (اختياري)', units: 4, cat: '2.أ المسار البرمجي', priority: 4, prereqs: ['web', 'java'], isOptional: true },
+        { id: 'mobile', title: 'تطبيقات موبايل (اختياري)', units: 4, cat: '2.أ المسار البرمجي', prereqs: ['web', 'java'], isOptional: true },
 
         // 2.ب مسار تحليل النظم والبرمجيات
-        { id: 'cs_intro', title: 'مقدمة في علم الحاسوب', units: 3, cat: '2.ب مسار تحليل النظم والبرمجيات', priority: 9, prereqs: [] },
-        { id: 'sa', title: 'تحليل نظم', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', priority: 8, prereqs: ['cs_intro'] },
-        { id: 'se', title: 'هندسة البرمجيات', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', priority: 7, prereqs: ['sa'] },
-        { id: 'db', title: 'إدارة قواعد البيانات', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', priority: 7, prereqs: ['sa'] },
-        { id: 'os', title: 'نظم تشغيل', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', priority: 6, prereqs: ['se'] },
-        { id: 'delphi', title: 'لغة دلفي', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', priority: 6, prereqs: ['db'] },
-        { id: 'arch', title: 'معمارية الحاسوب', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', priority: 5, prereqs: ['os', 'delphi'] },
-        { id: 'sys_prog', title: 'برمجة نظم', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', priority: 4, prereqs: ['arch'] },
+        { id: 'cs_intro', title: 'مقدمة في علم الحاسوب', units: 3, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: [] },
+        { id: 'sa', title: 'تحليل نظم', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['cs_intro'] },
+        { id: 'se', title: 'هندسة البرمجيات', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['sa'] },
+        { id: 'db', title: 'إدارة قواعد البيانات', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['sa'] },
+        { id: 'os', title: 'نظم تشغيل', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['se'] },
+        { id: 'delphi', title: 'لغة دلفي', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['db'] },
+        { id: 'arch', title: 'معمارية الحاسوب', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['os', 'delphi'] },
+        { id: 'sys_prog', title: 'برمجة نظم', units: 4, cat: '2.ب مسار تحليل النظم والبرمجيات', prereqs: ['arch'] },
 
         // 2.ج مسار العتاد والشبكات
-        { id: 'ee', title: 'مبادئ هندسة كهربائية', units: 4, cat: '2.ج مسار العتاد والشبكات', priority: 8, prereqs: [] },
-        { id: 'digital', title: 'مقدمة لأنظمة رقمية', units: 4, cat: '2.ج مسار العتاد والشبكات', priority: 7, prereqs: ['ee'] },
-        { id: 'org', title: 'تنظيم حاسبات', units: 4, cat: '2.ج مسار العتاد والشبكات', priority: 6, prereqs: ['digital'] },
-        { id: 'asm', title: 'لغة التجميع', units: 4, cat: '2.ج مسار العتاد والشبكات', priority: 5, prereqs: ['org'] },
-        { id: 'net', title: 'شبكات الحاسوب', units: 4, cat: '2.ج مسار العتاد والشبكات', priority: 5, prereqs: ['asm'] },
+        { id: 'ee', title: 'مبادئ هندسة كهربائية', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: [] },
+        { id: 'digital', title: 'مقدمة لأنظمة رقمية', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['ee'] },
+        { id: 'org', title: 'تنظيم حاسبات', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['digital'] },
+        { id: 'asm', title: 'لغة التجميع', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['org'] },
+        { id: 'net', title: 'شبكات الحاسوب', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['asm'] },
         
-        { id: 'sec', title: 'أمن المعلومات والبيانات (اختياري)', units: 4, cat: '2.ج مسار العتاد والشبكات', priority: 4, prereqs: ['net'], isOptional: true },
-        { id: 'net_design', title: 'إعداد وتصميم وحماية الشبكات (اختياري)', units: 4, cat: '2.ج مسار العتاد والشبكات', priority: 4, prereqs: ['net'], isOptional: true },
+        { id: 'sec', title: 'أمن المعلومات والبيانات (اختياري)', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['net'], isOptional: true },
+        { id: 'net_design', title: 'إعداد وتصميم وحماية الشبكات (اختياري)', units: 4, cat: '2.ج مسار العتاد والشبكات', prereqs: ['net'], isOptional: true },
 
         // 3. مرحلة التخرج
-        { id: 'train', title: 'مناهج البحث والتدريب الميداني', units: 2, cat: '3. مرحلة التخرج', priority: 10, reqUnits: 115 },
-        { id: 'proj', title: 'مشروع التخرج', units: 4, cat: '3. مرحلة التخرج', priority: 10, reqUnits: 115 }
+        { id: 'train', title: 'مناهج البحث والتدريب الميداني', units: 2, cat: '3. مرحلة التخرج', reqUnits: 115 },
+        { id: 'proj', title: 'مشروع التخرج', units: 4, cat: '3. مرحلة التخرج', reqUnits: 115 }
     ];
 
     let passed = new Set();
     let studentType = 'regular';
+
+    // ** دالة حساب ثقل/عمق المادة في الشجرة **
+    function calculateDependents(courseId) {
+        let count = 0;
+        courses.forEach(c => {
+            if (c.prereqs && c.prereqs.includes(courseId)) {
+                count += 1 + calculateDependents(c.id);
+            }
+        });
+        return count;
+    }
 
     function selectInitialType(t) {
         setStudentType(t);
@@ -311,15 +322,15 @@
 
                 let prereqName = '';
                 if (c.reqUnits) {
-                    prereqName = `تتطلب ${c.reqUnits} وحدة`;
+                    prereqName = `تتطلب إنجاز ${c.reqUnits} وحدة`;
                 } else if (c.isOptional && optionalPassedCount >= 2 && !isPassed) {
-                    prereqName = 'تم إكمال المادتين الاختياريتين';
+                    prereqName = 'تم استيفاء المواد الاختيارية';
                 } else if (c.prereqs && c.prereqs.length > 0) {
                     const titles = c.prereqs.map(pid => {
                         const p = courses.find(x => x.id === pid);
                         return p ? p.title.replace(' (اختياري)', '') : '';
                     }).join(' + ');
-                    prereqName = `تفتح بعد: ${titles}`;
+                    prereqName = `المتطلب السابق: ${titles}`;
                 }
 
                 card.innerHTML = `
@@ -369,28 +380,41 @@
         const list = document.getElementById('next-courses-list');
         list.innerHTML = '';
 
-        // تصفية المواد المتاحة حالياً بناءً على وضع الطالب
+        // 1. تصفية المواد المتاحة قانونياً للتسجيل
         let avail = courses.filter(c => {
             if (passed.has(c.id)) return false;
             if (c.isOptional && optionalCount >= 2) return false;
-            if (studentType === 'transfer') return true;
-            if (c.reqUnits && u < c.reqUnits) return false;
-            return !c.prereqs || c.prereqs.every(p => passed.has(p));
+            if (c.reqUnits && u < c.reqUnits) return false; // شرط مشروع التخرج والتدريب (115 وحدة)
+            
+            if (studentType === 'regular') {
+                return !c.prereqs || c.prereqs.every(p => passed.has(p));
+            }
+            return true; // طالب المعادلة له مرونة أكبر
         });
 
-        // ترتيب المواد المتاحة حسب الأولوية البرمجية والأكاديمية
-        avail.sort((a, b) => b.priority - a.priority);
+        // 2. خوارزمية الترتيب بالأولوية الذكية حسب عمق الشجرة
+        avail.sort((a, b) => {
+            // أ) مشروع التخرج والتدريب تأخذ أولوية فورية عند استيفاء شرط الـ 115 وحدة
+            if (a.reqUnits && !b.reqUnits) return -1;
+            if (!a.reqUnits && b.reqUnits) return 1;
 
+            // ب) الأولوية للمادة التي تفتح سلسلة أطول من المواد المستقلة (Tree Weight)
+            let weightA = calculateDependents(a.id);
+            let weightB = calculateDependents(b.id);
+            if (weightA !== weightB) return weightB - weightA;
+
+            // ج) تقديم المواد الإجبارية على الاختيارية
+            if (!a.isOptional && b.isOptional) return -1;
+            if (a.isOptional && !b.isOptional) return 1;
+
+            return 0;
+        });
+
+        // 3. بناء القائمة مع مراعاة حد الـ 21 وحدة وعدم تكرار السلسلة بنفس الفصل
         let total = 0;
-        let selectedInThisTerm = new Set();
-
         avail.forEach(c => {
-            // للتأكد من عدم اقتراح مادتين متتاليتين في نفس الفصل الافتراضي
-            let prereqAlreadyInTerm = c.prereqs && c.prereqs.some(p => selectedInThisTerm.has(p));
-            
-            if (!prereqAlreadyInTerm && (total + c.units <= 21)) {
+            if (total + c.units <= 21) {
                 total += c.units;
-                selectedInThisTerm.add(c.id);
                 
                 const item = document.createElement('div');
                 item.className = 'next-item';
@@ -399,7 +423,7 @@
             }
         });
 
-        if (total === 0) list.innerHTML = '<div style="color:var(--text-muted); text-align:center;">لا يوجد مواد متاحة.</div>';
+        if (total === 0) list.innerHTML = '<div style="color:var(--text-muted); text-align:center;">لا يوجد مواد متاحة حالياً.</div>';
     }
 
     render();
